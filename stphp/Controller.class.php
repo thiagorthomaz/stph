@@ -1,6 +1,6 @@
 <?php
 
-namespace controller;
+namespace stphp;
 
 /**
  * Description of Controller
@@ -10,7 +10,7 @@ namespace controller;
 class Controller {
   
   public function __construct() {
-    echo 'Controller constructed';
+    //echo 'Controller constructed';
   }
   
 }

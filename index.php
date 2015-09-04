@@ -3,12 +3,19 @@
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
-require_once './config/config.php';
+require_once __DIR__ . '/stphp/STPHP.class.php';
 
-$autoload->loader("Controller");
-$autoload->loader("Model");
+stphp\STPHP::registerExtensions();
+stphp\STPHP::registerAutoload();
+
+$app = new stphp\STPHP();
 
 
-new controller\Controller();
+
+new stphp\Controller();
+/*
 echo "<br>";
-new model\Model();
+new stphp\Model();
+
+echo "<br>";
+new stphp\View();

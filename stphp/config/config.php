@@ -1,5 +1,7 @@
 <?php
 
+namespace stphp\config;
+
 require_once 'AutoLoad.class.php';
 
 $folders_list = array('model', 'view','controller');
