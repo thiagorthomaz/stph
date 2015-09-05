@@ -27,8 +27,8 @@ class AutoLoad {
   */
   public static function autoload($className)
   {
-
-    $base_dir = __DIR__ . "/../..";
+    
+    $base_dir = __DIR__ . DIRECTORY_SEPARATOR .".." . DIRECTORY_SEPARATOR . "..";
 
     $className = ltrim($className, '\\');
 
@@ -39,9 +39,11 @@ class AutoLoad {
     }
     
     foreach (self::$extensions as $ext) {
+      
       $fileName  = $base_dir;
       $fileName .= DIRECTORY_SEPARATOR . $namespace . DIRECTORY_SEPARATOR . $className . $ext;
-
+      $fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $fileName);
+      
       if (file_exists($fileName)) {
           require $fileName;
           return true;
