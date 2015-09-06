@@ -10,12 +10,5 @@ stphp\STPHP::registerAutoload();
 
 $app = new stphp\STPHP();
 
-
-
-new stphp\Controller();
-/*
-echo "<br>";
-new stphp\Model();
-
-echo "<br>";
-new stphp\View();
+$rest = new stphp\rest\Request();
+$rest->handle();

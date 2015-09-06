@@ -10,7 +10,7 @@ namespace stphp;
 class Controller {
   
   public function __construct() {
-    //echo 'Controller constructed';
+    
   }
   
 }
