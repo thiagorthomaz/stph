@@ -10,7 +10,7 @@ namespace stphp;
 class Model {
   
   public function __construct() {
-    echo 'Model constructed';
+    
   }
   
 }
