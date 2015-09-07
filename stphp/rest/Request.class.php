@@ -94,9 +94,7 @@ class Request {
   }
     
   private function getData(){
-    $contents = file_get_contents('php://input');
-    $data = json_decode($contents);
-    return $data;
+    return $_REQUEST;
   }
 
   

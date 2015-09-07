@@ -22,8 +22,8 @@ class View implements \stphp\rest\iResponse{
     if ($this->mode == 'debug') {
       $options = JSON_PRETTY_PRINT;
     }
-
-    return json_encode($this->data, $options);
+    
+    return $this->data;
     
   }
   

@@ -10,16 +10,19 @@ abstract class Connection {
   
   private $host = null;
   private $port = null;
-  private $connection = null;
   private $database = null;
+  /**
+   *
+   * @var \MongoDB 
+   */
+  protected $connection = null;
   
-  public function __construct($host = "", $port = "", $database = ""){
-    
-  }
+  
   
   protected function connect(){
-    $mongodb = new MongoClient();
-    $this->connection = $mongodb->$this->$database;
+    $mongodb = new \MongoClient();
+    $this->connection = $mongodb->selectDB($this->database);
+
   }
   protected function disconect(){
     $this->connection = null;
@@ -56,8 +59,7 @@ abstract class Connection {
   function setConnection($connection) {
     $this->connection = $connection;
   }
-
-
+  
   
   
 }
