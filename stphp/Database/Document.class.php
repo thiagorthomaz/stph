@@ -37,7 +37,19 @@ abstract class Document implements \stphp\Database\iDataModel{
     $value_list = array();
     
     foreach ($attr_list as $att){
-      $value_list[$att] = utf8_encode(call_user_func(array($this, "get" . ucfirst($att))));
+      
+      $return = call_user_func(array($this, "get" . ucfirst($att)));
+      
+      if (is_array($return)){
+        foreach ($return as $r){
+          $value_list[$att][] = $r->toArray();
+        }
+      } elseif (is_object($return)){
+        $value_list[$att] = $return->toArray();
+      } else {
+        $value_list[$att] = $return;
+      }
+      
     }
     
     return $value_list;

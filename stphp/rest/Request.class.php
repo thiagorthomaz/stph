@@ -27,12 +27,12 @@ class Request {
     
     if ($this->method == "PUT" || $this->method == "POST"){
       $data = $this->getData();
-      array_merge($this->parameters, $data);
+      $this->parameters[] =  $data;
     }
     
     $map = $this->getClassMap();
     
-    $namespace  =  $map->getNamespace();
+    $namespace  = $map->getNamespace();
     $class      = $map->getClass();
     $method     = $map->getMethod();
     $params     = $map->getParameters();
@@ -70,7 +70,7 @@ class Request {
           $map->setMethod($this->parameters[2]);
           unset($this->parameters[2]);
         }
-       
+        
         if (isset($this->parameters[3])){
           $map->setParameters($this->parameters[3]);
           unset($this->parameters[3]);
