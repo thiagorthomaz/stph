@@ -21,7 +21,7 @@ interface iDAO {
    * @param array $criteria
    */
   public function delete($criteria);
-  public function select();
+  public function select(\stphp\Database\iDataModel &$data_model);
   public function selectAll();
   
   

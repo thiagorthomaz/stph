@@ -35,6 +35,16 @@ class View implements \stphp\rest\iResponse{
     $this->data = $data;
   }
 
+  function errOutput($message, $field, $cod_erro = null){
+    
+    $err= array();
+    $err['error_message'] = $message;
+    $err['error_field'] = $field;
+    $err['error_code'] = $cod_erro;
+    
+    return json_encode($err);
+    
+  }
 
 
 }

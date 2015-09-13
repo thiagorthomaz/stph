@@ -36,6 +36,12 @@ class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO
     $this->collection->remove($criteria);
   }
 
+  /**
+   * 
+   * @param \stphp\Database\iDataModel $data_model
+   * @return \stphp\Database\iDataModel
+   * @throws \stphp\Exception\MongoDBException
+   */
   public function insert(\stphp\Database\iDataModel &$data_model) {
     $document = $data_model->toArray();
 
@@ -53,8 +59,10 @@ class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO
     return $data_model;
   }
 
-  public function select() {
-    return $this->collection->find();
+  public function select(\stphp\Database\iDataModel &$data_model) {
+    $objId = new \MongoId($data_model->getId());
+    $rs = $this->collection->findOne(array("_id" => $objId));
+    return $this->toObject($rs, $data_model);
   }
 
   public function selectAll() {
@@ -75,18 +83,20 @@ class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO
   }
 
   private function array_to_obj($array, &$obj) {
-
-    foreach ($array as $key => $value) {
-      if (is_array($value)) {    
-        $instance = call_user_func(array($obj, "get" . $key));
-        $this->array_to_obj($value, $instance);
-        
-      } else {
-        call_user_func(array($obj, "set" . $key), $value);
-      }
-
-    }
     
+    if (is_array($array)){
+
+      foreach ($array as $key => $value) {
+        if (is_array($value)) {    
+          $instance = call_user_func(array($obj, "get" . $key));
+          $this->array_to_obj($value, $instance);
+
+        } else {
+          call_user_func(array($obj, "set" . $key), $value);
+        }
+
+      }
+    }
     return $obj;
   }
 
