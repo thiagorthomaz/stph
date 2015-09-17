@@ -94,7 +94,9 @@ class Request {
   }
     
   private function getData(){
-    return $_REQUEST;
+    $json_to_array = json_decode(file_get_contents('php://input'), true);
+    $data = array_merge($_REQUEST, $json_to_array);
+    return $data;
   }
 
   

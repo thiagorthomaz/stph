@@ -1,9 +1,8 @@
 {
-  "name": "view",
+  "name": "html",
   "version": "0.0.0",
-  "homepage": "https://github.com/thiagorthomaz/stphp",
   "authors": [
-    "thiagorthomaz <thiagorthomaz@gmail.com>"
+    "= <thiagorthomaz@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
@@ -14,9 +13,11 @@
     "tests"
   ],
   "dependencies": {
+    "angular-cookies": "~1.4.5",
+    "angular-resource": "~1.4.5",
+    "angular-route": "~1.4.5",
     "angular": "~1.4.5",
-    "bootstrap": "~3.3.5",
-    "font-awesome": "fontawesome#~4.4.0",
-    "jquery": "~2.1.4"
-  }
+    "bootstrap": "~3.3.5"
+  },
+  "directory": "app/view/"
 }
