@@ -29,7 +29,7 @@ class STPHP {
   }
   
   public static function registerExtensions(){
-    $extensions = array('.php', '.class.php');
+    $extensions = array('.class.php', '.php');
     \stphp\config\AutoLoad::setExtensions($extensions);
   }
 
