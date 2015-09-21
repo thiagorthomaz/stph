@@ -8,7 +8,9 @@ require_once __DIR__ . '/stphp/STPHP.class.php';
 stphp\STPHP::registerExtensions();
 stphp\STPHP::registerAutoload();
 
-$app = new stphp\STPHP();
+$session = new stphp\Session();
+$session->start();
 
-$rest = new stphp\rest\Request();
-$rest->handle();
+$app = new stphp\STPHP();
+$app->handle();
+
