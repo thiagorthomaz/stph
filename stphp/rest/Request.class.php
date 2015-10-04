@@ -18,85 +18,64 @@ class Request {
 
 
   public function __construct() {
+
+  }
+  
+  public function getMethod(){
     $this->method = filter_input(INPUT_SERVER, "REQUEST_METHOD");
-    $this->parameters = explode("/", filter_input(INPUT_SERVER, "PATH_INFO"));
-
+    return $this->method;
   }
   
-  public function handle(){
-    
-    if ($this->method == "PUT" || $this->method == "POST"){
-      $data = $this->getData();
-      $this->parameters[] =  $data;
-    }
-    
-    $map = $this->getClassMap();
-    
-    $namespace  = $map->getNamespace();
-    $class      = $map->getClass();
-    $method     = $map->getMethod();
-    $params     = $map->getParameters();
-    
-    $full_name = "\app\\" . $namespace.  "\\" . $class;
-    $rc = new \ReflectionClass($full_name);
-    $obj = $rc->newInstance();
-
-    if (!is_null($map->getMethod()) && method_exists($obj, $method) ) {
-      $data = call_user_func(array($obj, $method), $params);
-    }
-    
-    $this->sendData($data);
-    
+  public function isPost(){
+    return $this->getMethod() === "POST";
   }
   
-  private function getClassMap(){
-    
-    $map = new \stphp\rest\RequestMap();
-    
-    
-    $permitted_paths = array('controller', 'view');
-    
-    foreach ($permitted_paths as $path){
-      
-      if (isset(explode($path, $this->parameters[1])[1])){
-        
-        $map->setNamespace($path);
-        $map->setClass(explode($path, $this->parameters[1])[1]);
-        
-        unset($this->parameters[0]);
-        unset($this->parameters[1]);
-        
-        if (isset($this->parameters[2])){
-          $map->setMethod($this->parameters[2]);
-          unset($this->parameters[2]);
-        }
-        
-        if (isset($this->parameters[3])){
-          $map->setParameters($this->parameters[3]);
-          unset($this->parameters[3]);
-        }
-        
-        return $map;
-        
-      }
-      
-    }
-
-    throw new \stphp\Exception\RestException("You should not access another class beyond View or Controller from a URL.");
-    
+  public function isPut(){
+    return $this->getMethod() === "PUT";
   }
   
-  private function sendData(\stphp\rest\iResponse $response) {
-
-    echo $response->output();
-      
-      
+  public function isGet(){
+    return $this->getMethod() === "GET";
   }
-    
-  private function getData(){
-    $json_to_array = json_decode(file_get_contents('php://input'), true);
-    $data = array_merge($_REQUEST, $json_to_array);
+  
+  public function isDelete(){
+    return $this->getMethod() === "DELETE";
+  }
+
+  /**
+   * This method return union of GET and POST data as array; if doesn't exist, NULL is returned.
+   * @return array|mixed|null
+   */
+  function parameters($key = null, $default = null) {
+    $union = array_merge($this->get(), $this->post());
+    return $union;
+  }
+
+  public function get(){
+    $data = array();
+    $data['GET'] = explode("/", filter_input(INPUT_SERVER, "PATH_INFO"));
     return $data;
+  }
+  
+  public function post($key = null, $default = null){
+    
+    if ($this->isPost() || $this->isPut() || $this->isDelete()){
+      $data = array();
+      $json_to_array = json_decode(file_get_contents('php://input'), true);
+      $data[$this->getMethod()] = array_merge($_REQUEST, $json_to_array);
+      return $data;
+    } else {
+      return array();
+    }
+    
+  }
+  
+  public function put($key = null, $default = null){
+    return $this->post($key = null, $default = null);
+  }
+  
+  public function delete($key = null, $default = null){
+    return $this->post($key = null, $default = null);
   }
 
   
