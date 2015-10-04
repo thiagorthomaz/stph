@@ -45,7 +45,12 @@ abstract class Document implements \stphp\Database\iDataModel{
           $value_list[$att][] = $r->toArray();
         }
       } elseif (is_object($return)){
-        $value_list[$att] = $return->toArray();
+        if ($return instanceof \MongoId){
+          $value_list["_id"] = $return;
+        } else {
+          $value_list[$att] = $return->toArray();
+        }
+        
       } else {
         $value_list[$att] = $return;
       }

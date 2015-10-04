@@ -9,7 +9,7 @@ namespace stphp\rest;
 interface iResource {
   
   public function get($parameters);
-  public function save($parameters);
+  public function post($parameters);
   public function update($parameters);
   public function delete($parameters);
   

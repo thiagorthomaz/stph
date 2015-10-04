@@ -78,16 +78,21 @@ class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO
     return $rs;
   }
 
-  public function update($criteria, \stphp\Database\iDataModel &$data_model) {
-    $this->collection->update($criteria, array("$set" => $this->document->toArray()));
+  public function update($criteria, \stphp\Database\iDataModel &$data_model, $options = array("upsert"=>false,"multiple"=>false)) {
+    $newdata = $data_model->toArray();
+    if ($options["upsert"] === false && $options["multiple"] === false){
+      //print_r($newdata);
+    }
+    //exit;
+    $this->collection->update($criteria, $newdata, $options);
   }
 
   private function array_to_obj($array, &$obj) {
-    
-    if (is_array($array)){
 
+    if (is_array($array)){
+      
       foreach ($array as $key => $value) {
-        if (is_array($value)) {    
+        if (is_array($value)) {
           $instance = call_user_func(array($obj, "get" . $key));
           $this->array_to_obj($value, $instance);
 
@@ -106,9 +111,13 @@ class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO
       $array_mongo['id'] = $array_mongo['_id']->{'$id'};
       unset($array_mongo['_id']);
     }
-    
+
     return $this->array_to_obj($array_mongo, $data_model);
 
+  }
+  
+  public function count($query = array(), $options = array()){
+    return $this->collection->count($query);
   }
 
 }
