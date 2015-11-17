@@ -40,7 +40,7 @@ class STPHP {
   public function handle(){
 
     $map = $this->getClassMap();
-
+    
     $namespace  = $map->getNamespace();
     $class      = $map->getClass();
     $method     = $map->getMethod();
@@ -67,13 +67,12 @@ class STPHP {
    */
   public function getClassMap(){
     $this->parameters = $this->request->parameters();
-    
+
     $map = new \stphp\rest\RequestMap();
 
     $nodes_path = array('app\controller', 'app\view');
     
-    $parameters = $this->request->parameters();
-    $get = $parameters['GET'];
+    $get = $this->parameters['GET'];
     
     foreach ($nodes_path as $path){
       
@@ -88,16 +87,19 @@ class STPHP {
         $map->setNamespace($path);
         $map->setClass($class);
         
-        unset($get[0]);
-        unset($get[1]);
-        
-        $map->setMethod($this->request->getMethod());
-        
-        if (isset($get[2]) || isset($parameters['POST'])){
-          $map->setParameters($this->request->parameters());
-          unset($get[2]);
+        if (count($get) === 4){
+          //$map->setMethod($this->request->getMethod());
+          $map->setMethod($get[2]);
+        } else {
+          $map->setMethod(strtolower($this->request->getMethod()));
         }
         
+        unset($get[0]);
+        unset($get[1]);
+        unset($get[2]);
+        
+        $map->setParameters($this->request->parameters());
+
         return $map;
         
       }
