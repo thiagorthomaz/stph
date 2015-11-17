@@ -7,7 +7,7 @@ namespace stphp\Database;
  *
  * @author thiago
  */
-class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO {
+abstract class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO {
 
   /**
    *
@@ -29,8 +29,11 @@ class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO
   protected $document_name = null;
 
   public function __construct() {
-    $this->collection = $this->connection->selectCollection($this->document_name);
+    $this->collection = $this->connection->selectCollection($this->getDocumentName());
   }
+  
+  abstract protected function getDocumentName();
+  abstract protected function getDocument();
 
   public function delete($criteria) {
     $this->collection->remove($criteria);
@@ -43,77 +46,132 @@ class MongoDB extends \stphp\Database\Connection implements \stphp\Database\iDAO
    * @throws \stphp\Exception\MongoDBException
    */
   public function insert(\stphp\Database\iDataModel &$data_model) {
-    $document = $data_model->toArray();
 
-    unset($document['id']); //If send this to the insert function, will be created a field "ID" without value
-
+    if (!empty($data_model->get_Id())){
+      $id = new \MongoId($data_model->get_Id());
+    } else {
+      $id = new \MongoId();
+    }
+    $data_model->set_Id($id);
+    
+    $document = $data_model->toDocument();
+    
     $rs = $this->collection->insert($document);
 
-    if (is_null($rs['err']) && $rs['ok']) {
-      $new_id = $document['_id']->{'$id'};
-      $data_model->setId($new_id);
+    if ($rs['ok'] == 1 && is_null($rs['err'])){
+      return true;
     } else {
-      throw new \stphp\Exception\MongoDBException("Erro: " . $rs['err']);
+      throw new \stphp\Exception\MongoDBException("Insert Failed");
     }
 
-    return $data_model;
   }
 
   public function select(\stphp\Database\iDataModel &$data_model) {
-    $objId = new \MongoId($data_model->getId());
-    $rs = $this->collection->findOne(array("_id" => $objId));
-    return $this->toObject($rs, $data_model);
+    $rs = $this->collection->findOne(array("_id" => new \MongoId($data_model->get_Id())));
+    $this->toObject($rs, $data_model);
+    return $data_model;
   }
 
   public function selectAll() {
 
     $rs = array();
     $cursor = $this->collection->find();
+    
     foreach ($cursor as $id => $document) {
-      foreach ($document as $field_name => $field_value) {
-        $rs[$id][$field_name] = $field_value;
-      }
+      $data_model = $this->getDocument();
+      $this->toObject($document, $data_model);
+      $rs[] = $data_model;
     }
 
     return $rs;
   }
 
   public function update($criteria, \stphp\Database\iDataModel &$data_model, $options = array("upsert"=>false,"multiple"=>false)) {
-    $newdata = $data_model->toArray();
+    $newdata = $data_model->toDocument();
     if ($options["upsert"] === false && $options["multiple"] === false){
-      //print_r($newdata);
+      //Not implemented yet.
     }
-    //exit;
-    $this->collection->update($criteria, $newdata, $options);
+    
+    $rs = $this->collection->update($criteria, $newdata, $options);
+    
+    if ( ($rs['ok'] == 1) && is_null($rs['err'])) {
+      return TRUE;
+    }else {
+      throw new \stphp\Exception\MongoDBException("Falha: " . $rs['err']);
+    }
+    
+    
   }
+  
+  private function array_to_obj($array, \stphp\Database\iDataModel &$obj) {
+    
+     if (is_array($array)) {
+       
+       $attributes = array_keys($array);
+       
+       foreach ($attributes as $attr) {
 
-  private function array_to_obj($array, &$obj) {
+        if (array_key_exists($attr, $array)) {
+          
+          $array_value = $array[$attr];
 
-    if (is_array($array)){
-      
-      foreach ($array as $key => $value) {
-        if (is_array($value)) {
-          $instance = call_user_func(array($obj, "get" . $key));
-          $this->array_to_obj($value, $instance);
+          $description = $obj->getDescription($attr);
+          
+          if ($description) {
+            
+            $namespace = $description->getNamespace();
+            $type = $description->getType();
+            $object_name = $namespace . $type; 
+            $new_object = new $object_name();
 
-        } else {
-          call_user_func(array($obj, "set" . $key), $value);
+            if ($description->getRelationship() === \stphp\FieldsDescriptor::oneToOne) {
+              
+              if ($array_value instanceof \MongoId){
+                $new_object->set_id($array_value);
+                call_user_func(array($obj, "set" . $attr), $new_object);
+              } else {
+                $this->array_to_obj($array_value, $new_object);
+                call_user_func(array($obj, "set" . $attr), $new_object);
+              }
+
+            }
+
+            if ($description->getRelationship() === \stphp\FieldsDescriptor::oneToMany) {
+              
+              if (!is_null($array_value)) {
+                foreach ($array_value as $array_value_child){
+                  $clone = clone $new_object;
+                  if ($array_value_child instanceof \MongoId){
+                    $clone->set_id($array_value_child);
+                  }else {
+                    $this->array_to_obj($array_value_child, $clone);
+                  }
+                  call_user_func(array($obj, "set" . $attr), $clone);
+                }  
+              }
+
+            }
+
+          } else {
+            
+            if (!is_array($array_value)){
+              call_user_func(array($obj, "set" . $attr), $array_value);
+            }
+
+          }
+
         }
 
+       }
+
       }
-    }
+
     return $obj;
+
   }
 
-
   public function toObject($array_mongo, \stphp\Database\iDataModel &$data_model) {
-    if (isset($array_mongo['_id'])) {
-      $array_mongo['id'] = $array_mongo['_id']->{'$id'};
-      unset($array_mongo['_id']);
-    }
-
     return $this->array_to_obj($array_mongo, $data_model);
-
   }
   
   public function count($query = array(), $options = array()){

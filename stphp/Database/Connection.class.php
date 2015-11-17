@@ -8,8 +8,8 @@ namespace stphp\Database;
  */
 abstract class Connection {
   
-  private $host = null;
-  private $port = null;
+  private $host = "localhost";
+  private $port = "27017";
   private $database = null;
   /**
    *
@@ -20,7 +20,7 @@ abstract class Connection {
   
   
   protected function connect(){
-    $mongodb = new \MongoClient();
+    $mongodb = new \MongoClient( "mongodb://" . $this->host . ":" . $this->port );
     $this->connection = $mongodb->selectDB($this->database);
 
   }

@@ -9,15 +9,18 @@ namespace stphp\Database;
  */
 abstract class Document implements \stphp\Database\iDataModel{
   
-  protected $id;
+  protected $_id;
   //protected $aggregated_to = array();
   
-  function getId() {
-    return $this->id;
+  function get_Id() {
+    return (string)$this->_id;
   }
 
-  function setId($id) {
-    $this->id = $id;
+  function set_Id($id) {
+    if (empty($id)){
+      $id = null;
+    }
+    $this->_id = new \MongoId($id);
   }
   
   protected function getAttributeList(){
@@ -42,23 +45,111 @@ abstract class Document implements \stphp\Database\iDataModel{
       
       if (is_array($return)){
         foreach ($return as $r){
-          $value_list[$att][] = $r->toArray();
-        }
+            if ($r instanceof \stphp\Database\iDataModel){
+              $value_list[$att][] = $r->toArray();
+            } else {
+              $value_list[$att][] = $r;
+            }
+            
+          }
       } elseif (is_object($return)){
         if ($return instanceof \MongoId){
-          $value_list["_id"] = $return;
+          $value_list[$att] = $return;
         } else {
           $value_list[$att] = $return->toArray();
         }
         
       } else {
         $value_list[$att] = $return;
+        if (!is_null($return)){
+          
+        }
+        
       }
       
     }
     
     return $value_list;
     
+  }
+  
+  /**
+   * @TODO improve this method and toArray
+   * @return array
+   */
+  public function toDocument() {
+
+    $attr_list = $this->getAttributeList();
+    $value_list = array();
+
+    foreach ($attr_list as $att) {
+      $descriptor = $this->getDescription($att);
+      
+      if ($att == "_id"){
+        $return = call_user_func(array($this, "get" . ucfirst($att)));
+        if (empty($return)){
+          $return = null;
+        }
+        $value_list[$att] = new \MongoId($return);
+        
+      } else {
+
+        $return = call_user_func(array($this, "get" . ucfirst($att)));
+        if ($return instanceof \stphp\Database\Document){
+          $value_list[$att] = $return->toDocument();  
+        } else if ($descriptor) {
+          
+          if ($descriptor->getRelationship() == \stphp\FieldsDescriptor::oneToOne){
+            if ( $descriptor->getOnlyKey() ){
+              $value_list[$att] = new \MongoId($return);
+            }
+          }
+          
+          if ($descriptor->getRelationship() == \stphp\FieldsDescriptor::oneToMany){
+            if (!is_null($return)){
+              foreach ($return as $r) {
+                
+                if ( $descriptor->getOnlyKey() ){
+                  $value_list[$att][] = new \MongoId($r);
+                }else {
+                  $value_list[$att][] = $r->toDocument();
+                }
+                
+              }  
+            }
+            
+
+          }
+
+          
+        } else {
+          $value_list[$att] = $return;
+        }
+        
+      }
+    }
+    
+    return $value_list;
+  }
+
+  /**
+   * 
+   * @param string $field
+   * @param \stphp\Database\iDataModel $obj
+   * @return FieldsDescriptor
+   */
+  public function getDescription($field) {
+    $fieldsDescriptors = $this->getFieldsDescriptor();
+    if (!is_null($fieldsDescriptors)){
+      foreach ($fieldsDescriptors as $i => $description){
+        if ($description->getField_name() === $field){
+          return $description;
+        }
+      }
+    }
+    
+    
+    return false;
   }
   
   public function toJson(){

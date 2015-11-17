@@ -7,6 +7,8 @@ namespace stphp\Database;
  * @author thiago
  */
 interface iDataModel {
-  public function setId($id);
-  public function getId();
+  public function set_Id($id);
+  public function get_Id();
+  public function getFieldsDescriptor();
+  public function getDescription($field);
 }
