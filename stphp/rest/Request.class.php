@@ -62,7 +62,12 @@ class Request {
     if ($this->isPost() || $this->isPut() || $this->isDelete()){
       $data = array();
       $json_to_array = json_decode(file_get_contents('php://input'), true);
-      $data[$this->getMethod()] = array_merge($_REQUEST, $json_to_array);
+      if (is_null($json_to_array)){
+        $data[$this->getMethod()] = $_REQUEST;
+      } else {
+        $data[$this->getMethod()] = array_merge($_REQUEST, $json_to_array);
+      }
+      
       return $data;
     } else {
       return array();
