@@ -55,7 +55,9 @@ abstract class Document implements \stphp\Database\iDataModel{
       } elseif (is_object($return)){
         if ($return instanceof \MongoId){
           $value_list[$att] = $return;
-        } else {
+        } if ($return instanceof \MongoTimestamp) {
+          $value_list[$att] = $return;
+        }else {
           $value_list[$att] = $return->toArray();
         }
         
