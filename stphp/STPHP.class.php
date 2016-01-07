@@ -15,12 +15,21 @@ class STPHP {
   
   /**
    *
-   * @var stphp\rest\Request
+   * @var stphp\http\HttpRequest
    */
   private $request;
-          
+  /**
+   *
+   * @var stphp\http\HttpResponse
+   */
+  private $response;
+  
   function __construct() {
-    $this->request = new \stphp\rest\Request();
+    
+    $request = new \stphp\rest\Request();
+    $this->request = $request->getRequest();
+    $this->response = $request->getReponse();
+    
   }
 
   
@@ -38,80 +47,50 @@ class STPHP {
    * 
    */
   public function handle(){
+    
+    
+    $full_url = filter_input(INPUT_SERVER, "REQUEST_URI");
 
-    $map = $this->getClassMap();
-    
-    $namespace  = $map->getNamespace();
-    $class      = $map->getClass();
-    $method     = $map->getMethod();
-    $params     = $map->getParameters();
+    $parts_url = explode("?", $full_url);
+    $parts_url = explode("/", $parts_url[0]);
 
-    $full_name = $namespace.  "\\" . $class;
+    $namespace  = "view";
+    $class = "View";
+    $method = "noViewImplemented";
     
-    $rc = new \ReflectionClass($full_name);
-    $obj = $rc->newInstance();
-
-    if (!is_null($map->getMethod()) && method_exists($obj, $method) ) {
-      $data = call_user_func(array($obj, $method), $params);
-    }
-    
-    $this->sendData($data);
-    
-  }
-  
-  /**
-   * @TODO improve this function
-   * 
-   * @return \stphp\rest\RequestMap
-   * @throws \stphp\Exception\RestException
-   */
-  public function getClassMap(){
-    $this->parameters = $this->request->parameters();
-
-    $map = new \stphp\rest\RequestMap();
-
-    $nodes_path = array('app\controller', 'app\view');
-    
-    $get = $this->parameters['GET'];
-    
-    foreach ($nodes_path as $path){
+    foreach ($parts_url as $part){
+      $path_invoke = explode(".", $part);
       
-      $path_parts = explode("\\", $path);
-      $sub_namespace = $path_parts[1];
-      
-      $class_parts = explode($sub_namespace, $get[1]);
-      
-      if (isset($class_parts[1])){
-        $class = $class_parts[1];
+      if (count($path_invoke) == 2) {
 
-        $map->setNamespace($path);
-        $map->setClass($class);
-        
-        if (count($get) === 4){
-          //$map->setMethod($this->request->getMethod());
-          $map->setMethod($get[2]);
-        } else {
-          $map->setMethod(strtolower($this->request->getMethod()));
-        }
-        
-        unset($get[0]);
-        unset($get[1]);
-        unset($get[2]);
-        
-        $map->setParameters($this->request->parameters());
-
-        return $map;
+        $class = $path_invoke[0];
+        $method = $path_invoke[1];
         
       }
       
     }
 
-    throw new \stphp\Exception\RestException("You should not access another class beyond View or Controller from a URL.");
+    $full_name = "app\\" . $namespace.  "\\" . $class;
+    $this->invoke($full_name, $method);
+
+  }
+  
+  public function invoke($path, $method){
+
+    $rc = new \ReflectionClass($path);
+    $obj = $rc->newInstance();
+
+
+    if (!is_null( $method ) && method_exists($obj, $method) ) {
+      $data = call_user_func(array($obj, $method), $this->response);
+    }
+    
+    $this->sendData($data);
     
   }
  
   private function sendData(\stphp\rest\iResponse $response) {
-    echo $response->output();
+    echo $response->output($this->response);
   }
   
 }

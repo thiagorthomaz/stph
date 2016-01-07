@@ -12,7 +12,7 @@ class View implements \stphp\rest\iResponse{
   private $data;
   private $mode = "";
   
-  public function output() {
+  public function output(\stphp\http\HttpResponse $response) {
 
     header("Cache-Control: no-cache, must-revalidate");
     header("Expires: 0");
@@ -44,6 +44,14 @@ class View implements \stphp\rest\iResponse{
     
     return json_encode($err);
     
+  }
+  
+  function noViewImplemented() {
+    
+    $data = array("error" => 404, "message" => "Not implemented yet.");
+    $this->setData(json_encode($data));
+    return $this;
+
   }
 
 

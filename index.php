@@ -9,6 +9,8 @@ stphp\config\AutoLoad::addNamespace("stphp");
 stphp\config\AutoLoad::addNamespace("stphp\\Database");
 stphp\config\AutoLoad::addNamespace("stphp\\Exception");
 stphp\config\AutoLoad::addNamespace("stphp\\rest");
+stphp\config\AutoLoad::addNamespace("stphp\\http");
+
 stphp\config\AutoLoad::addNamespace("app\\controller");
 stphp\config\AutoLoad::addNamespace("app\\model");
 stphp\config\AutoLoad::addNamespace("app\\view");

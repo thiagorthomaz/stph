@@ -7,7 +7,7 @@ namespace stphp;
  *
  * @author thiago
  */
-class Controller {
+class Controller extends \stphp\http\HttpServlet {
   
   public function __construct() {
     
