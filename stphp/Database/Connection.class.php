@@ -11,19 +11,12 @@ abstract class Connection {
   private $host = "localhost";
   private $port = "27017";
   private $database = null;
-  /**
-   *
-   * @var \MongoDB 
-   */
+  private $settings = null;
+
   protected $connection = null;
   
-  
-  
-  protected function connect(){
-    $mongodb = new \MongoClient( "mongodb://" . $this->host . ":" . $this->port );
-    $this->connection = $mongodb->selectDB($this->database);
+  abstract protected function connect(iConnectionDB $config);
 
-  }
   protected function disconect(){
     $this->connection = null;
   }
@@ -36,9 +29,7 @@ abstract class Connection {
     return $this->port;
   }
 
-  function getConnection() {
-    return $this->connection;
-  }
+  abstract public function getConnection();
 
   function getDatabase() {
     return $this->database;

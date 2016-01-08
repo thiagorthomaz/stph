@@ -32,6 +32,19 @@ abstract class MongoDB extends \stphp\Database\Connection implements \stphp\Data
     $this->collection = $this->connection->selectCollection($this->getDocumentName());
   }
   
+  protected function connect(){
+    $mongodb = new \MongoClient( "mongodb://" . $this->host . ":" . $this->port );
+    $this->connection = $mongodb->selectDB($this->database);
+  }
+  
+  /**
+   * 
+   * @return \MongoDB
+   */
+  public function getConnection() {
+    return $this->connection;
+  }
+  
   abstract protected function getDocumentName();
   abstract protected function getDocument();
 

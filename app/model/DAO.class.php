@@ -7,16 +7,16 @@ namespace app\model;
  *
  * @author thiago
  */
-class DAO extends \stphp\Database\MongoDB{
+class DAO extends \stphp\Database\MySQL{
 
   public function __construct() {
+
+    $pdo_config = new \app\config\PDOConfig();
+    $pdo_config->setUser("root");
+    $pdo_config->setpassword("");
     
-    $host = "";
-    $port = "";
-    $this->setDatabase("tcc");
-    $this->connect();
-    
-    parent::__construct();
+    $this->connect($pdo_config);
+
   }
   
 }

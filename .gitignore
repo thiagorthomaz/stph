@@ -1,5 +1,7 @@
 /nbproject/
 /vendor/
 /app/
-/tests/app/
+/tests/app/controller/
+/tests/app/model/
+/tests/app/view/
 /bower_components/

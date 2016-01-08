@@ -3,6 +3,7 @@
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
+require_once __DIR__ . '/stphp/config/config.php';
 require_once __DIR__ . '/stphp/STPHP.class.php';
 
 stphp\config\AutoLoad::addNamespace("stphp");
@@ -11,6 +12,7 @@ stphp\config\AutoLoad::addNamespace("stphp\\Exception");
 stphp\config\AutoLoad::addNamespace("stphp\\rest");
 stphp\config\AutoLoad::addNamespace("stphp\\http");
 
+stphp\config\AutoLoad::addNamespace("app\\config");
 stphp\config\AutoLoad::addNamespace("app\\controller");
 stphp\config\AutoLoad::addNamespace("app\\model");
 stphp\config\AutoLoad::addNamespace("app\\view");
