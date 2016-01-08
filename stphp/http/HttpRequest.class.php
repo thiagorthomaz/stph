@@ -38,6 +38,14 @@ class HttpRequest {
   private $method;
   
   /**
+   * Return all params
+   * 
+   * @return array
+   */
+  public function getAllParams() {
+    return $this->params;
+  }
+  /**
    * Return a param value by the key
    * 
    * @param string $name

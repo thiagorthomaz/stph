@@ -54,7 +54,7 @@ class STPHP {
     $parts_url = explode("?", $full_url);
     $parts_url = explode("/", $parts_url[0]);
 
-    $namespace  = "view";
+    $namespace  = "controller";
     $class = "View";
     $method = "noViewImplemented";
     
@@ -63,8 +63,8 @@ class STPHP {
       
       if (count($path_invoke) == 2) {
 
-        $class = $path_invoke[0];
-        $method = $path_invoke[1];
+        $class = ucfirst($path_invoke[0]);
+        $method = strtolower($path_invoke[1]);
         
       }
       

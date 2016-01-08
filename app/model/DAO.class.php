@@ -7,7 +7,7 @@ namespace app\model;
  *
  * @author thiago
  */
-class DAO extends \stphp\Database\MySQL{
+abstract class DAO extends \stphp\Database\MySQL{
 
   public function __construct() {
 

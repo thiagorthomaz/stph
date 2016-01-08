@@ -48,9 +48,9 @@ class AutoLoad {
     foreach (self::$extensions as $ext) {
       
       $fileName  = self::$namespaces[$namespace];
-      $fileName .= DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR . $className . $ext;
+      $fileName .= DIRECTORY_SEPARATOR . $className . $ext;
       $fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $fileName);
-      
+
       if (file_exists($fileName)) {
           require $fileName;
           return true;
