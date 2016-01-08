@@ -46,8 +46,11 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
 
 
   public function select(iDataModel &$data_model, $params = array(), $condition = "AND") {
+    
     $sql = "SELECT * from " . $this->getTable();
     $prepared_query = $this->connection->prepare($sql);
+    
+    $where_params = array();
     
     if (count($params) > 0 ) {
 
@@ -55,8 +58,6 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       $last_key = key($params);
       reset($params);
       
-      $where_params = array();
-
       $where = " where ";
 
       foreach ($params as $key => $value) {
@@ -68,7 +69,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       }
       
       $sql .= $where;
-      
+
       $prepared_query = $this->connection->prepare($sql);
       
     }
