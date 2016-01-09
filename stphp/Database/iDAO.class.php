@@ -23,6 +23,7 @@ interface iDAO {
   public function delete(\stphp\Database\iDataModel &$data_model);
   public function select(\stphp\Database\iDataModel &$data_model);
   public function selectAll();
+  public function sendQuery($query, $params);
   
   
 }

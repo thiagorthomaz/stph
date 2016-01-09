@@ -20,7 +20,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     
     $dsn = $driver.':dbname='.$database.";host=".$host;
     $pdo = new \PDO($dsn, $username, $pass);
-    
+    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     $this->connection = $pdo;
 
   }
@@ -44,43 +44,29 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     
   }
 
-
-  public function select(iDataModel &$data_model, $params = array(), $condition = "AND") {
+  protected function getTableNick($table_name){
+    return substr(md5($table_name), 0, 6);
+  }
+  
+  
+  public function select(iDataModel &$data_model) {
     
-    $sql = "SELECT * from " . $this->getTable();
-    $prepared_query = $this->connection->prepare($sql);
+    $table_name = $this->getTable();
+    $sql = "select * from " . $table_name . " where id = :id";
+
+    $STH = $this->connection->prepare($sql);
+    $id = $data_model->getId();
+    $STH->bindParam("id", $id);
+    $STH->execute();
     
-    $where_params = array();
+    $STH->setFetchMode(\PDO::FETCH_ASSOC);
     
-    if (count($params) > 0 ) {
-
-      end($params);
-      $last_key = key($params);
-      reset($params);
-      
-      $where = " where ";
-
-      foreach ($params as $key => $value) {
-        $where .= $key . " = :" . $key;
-        if ($key != $last_key){
-          $where .= " " . $condition . " ";
-        }
-        $where_params[":".$key] = $value;
-      }
-      
-      $sql .= $where;
-
-      $prepared_query = $this->connection->prepare($sql);
-      
-    }
-    
-    $prepared_query->setFetchMode(\PDO::FETCH_ASSOC);
-    $prepared_query->execute($where_params);
-
     $result_list = array();
-    while($result = $prepared_query->fetch()) {
+    
+    while($result = $STH->fetch()) {
       $result_list[] = $result;
     }
+    
     return $result_list;
 
   }
@@ -105,5 +91,46 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
 
   }
 
+  protected function where($params){
+    $sql = "";
+    if (count($params) > 0){
+      $sql .= "\nwhere ";
+      end($params);
+      $last_column = key($params);
+      reset($params);
+      
+      foreach ($params as $column => $value) {
+        $sql .= $column . " = :" . $column;
+        if ($column !== $last_column){
+          $sql .= " and ";
+        }
+      }
+    }
+    
+    return $sql;
+    
+  }
+  
+  public function sendQuery($query, $params) {
+
+    $conn = $this->getConnection();
+    $prepared = $conn->prepare($query);
+    
+    $exec_params = array();
+    foreach ($params as $column => $value){
+      $exec_params[":" . $column] = $value;
+    }
+
+    $prepared->execute($exec_params);
+    $prepared->setFetchMode(\PDO::FETCH_ASSOC);
+    
+    $result_list = array();
+    
+    while($result = $prepared->fetch()) {
+      $result_list[] = $result;
+    }
+    
+    return $result_list;
+  }
 
 }
