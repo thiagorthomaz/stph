@@ -8,10 +8,9 @@ namespace stphp\Database;
  */
 abstract class Connection {
   
-  private $host = "localhost";
-  private $port = "27017";
-  private $database = null;
-  private $settings = null;
+  protected $host = "localhost";
+  protected $port = "27017";
+  protected $database = null;
 
   protected $connection = null;
   

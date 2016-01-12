@@ -14,11 +14,11 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     $username = $config->getUser();
     $pass = $config->getpassword();
     
-    $driver = $config->getDriver();
-    $database = $config->getDatabase();
-    $host = $config->getHost();
+    $this->driver = $config->getDriver();
+    $this->database = $config->getDatabase();
+    $this->host = $config->getHost();
     
-    $dsn = $driver.':dbname='.$database.";host=".$host;
+    $dsn = $this->driver.':dbname='.$this->database.";host=".$this->host;
     $pdo = new \PDO($dsn, $username, $pass);
     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     $this->connection = $pdo;
@@ -26,7 +26,9 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
   }
   
   abstract public function getTable();
-
+  abstract public function getModel();
+  abstract public function modeltoArray(\stphp\Database\iDataModel $data_model);
+  
   /**
    * 
    * @return \PDO
@@ -41,7 +43,19 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
   }
 
   public function insert(iDataModel &$data_model) {
-    
+
+    $bindings = $this->modeltoArray($data_model);
+
+    $fields = array_keys($bindings);
+
+    $fields_vals = array(implode("`,`", $fields) . "`", ",:" . implode(",:", $fields));
+    $table_name = "`" . $this->database . "`.`" .$this->getTable();
+    $sql = str_replace("(,", "(", "INSERT INTO " . $table_name . "` (`" .$fields_vals[0] . ") VALUES (" . $fields_vals[1] . ");");
+
+    $inserted = $this->sendQuery($sql, $bindings);
+
+    return $inserted;
+
   }
 
   protected function getTableNick($table_name){
@@ -111,25 +125,43 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     
   }
   
+  /**
+   * If is a select query, this method will return a fetched result.
+   * If is a insert|delete|update query, will return the number of affected rows
+   * 
+   * @param string $query
+   * @param array $params
+   * @return mixed
+   */
   public function sendQuery($query, $params) {
 
     $conn = $this->getConnection();
     $prepared = $conn->prepare($query);
-    
+
     $exec_params = array();
     foreach ($params as $column => $value){
       $exec_params[":" . $column] = $value;
     }
-
+    
+    
     $prepared->execute($exec_params);
-    $prepared->setFetchMode(\PDO::FETCH_ASSOC);
+
+    $result_list = $prepared->rowCount();
     
-    $result_list = array();
-    
-    while($result = $prepared->fetch()) {
-      $result_list[] = $result;
+    /**
+     * The insert|updade|delete query doesn't return a 'fetchable' value.
+     * 
+     */
+    if (count(explode("select", $query)) > 1){
+      $prepared->setFetchMode(\PDO::FETCH_ASSOC);
+
+      $result_list = array();
+      while($result = $prepared->fetchAll()) {
+        $result_list[] = $result;
+      }
+      
     }
-    
+
     return $result_list;
   }
 
