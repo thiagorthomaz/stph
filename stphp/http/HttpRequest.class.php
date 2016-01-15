@@ -104,10 +104,10 @@ class HttpRequest {
     if (!is_array($params)){
       throw new HttpRequestException('$params must be a Array');
     }
-    if (!is_array($this->params)){
+    if (!isset($this->params)){
       $this->params = array();
-    }
-    array_merge($this->params, $params);
+    }    
+    $this->params = array_merge($this->params, $params);
 
   }
 

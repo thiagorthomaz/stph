@@ -134,7 +134,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
    * @return mixed
    */
   public function sendQuery($query, $params) {
-
+    
     $conn = $this->getConnection();
     $prepared = $conn->prepare($query);
 
@@ -145,24 +145,26 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     
     
     $prepared->execute($exec_params);
-
-    $result_list = $prepared->rowCount();
     
     /**
      * The insert|updade|delete query doesn't return a 'fetchable' value.
      * 
      */
-    if (count(explode("select", $query)) > 1){
+    if (count(explode("select", $query)) > 1) {
       $prepared->setFetchMode(\PDO::FETCH_ASSOC);
 
       $result_list = array();
       while($result = $prepared->fetchAll()) {
         $result_list[] = $result;
       }
-      
+
+      return $result_list[0];
+
+    } else { //Insert, Update or Delete
+      $result_list = $prepared->rowCount();
+      return $result_list;
     }
 
-    return $result_list;
   }
 
 }

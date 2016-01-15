@@ -87,13 +87,13 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
       $data = array();
       $json_to_array = json_decode(file_get_contents('php://input'), true);
       if (is_null($json_to_array)){
-        $data[$this->getMethod()] = $_REQUEST;
+        $data[$request->getMethod()] = $_REQUEST;
       } else {
-        $data[$this->getMethod()] = array_merge($_REQUEST, $json_to_array);
+        $data[$request->getMethod()] = array_merge($_REQUEST, $json_to_array);
       }
-      
-      $this->request->setParams($data);
-      
+
+      $request->setParams(array_pop($data));
+
     }
     
   }

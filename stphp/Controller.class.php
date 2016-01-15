@@ -10,16 +10,14 @@ namespace stphp;
 class Controller extends \stphp\http\HttpServlet {
   
   public function __construct() {
-    $request = new \stphp\http\HttpRequest();
-    $response = new \stphp\http\HttpResponse();
-    $this->execute($request, $response);
+    parent::__construct();
   }
   
   public function prepareRequest(\stphp\Database\iDataModel &$model){
     
     $request = $this->getRequest();
     $params = $request->getAllParams();
-
+    
     if (is_null($params)){
       return null;
     }
