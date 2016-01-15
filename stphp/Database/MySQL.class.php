@@ -135,34 +135,49 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
    */
   public function sendQuery($query, $params) {
     
-    $conn = $this->getConnection();
-    $prepared = $conn->prepare($query);
+    $resulset = new \stphp\Database\ResultSet();
+    
+    try{
+      
+      $conn = $this->getConnection();
+      $prepared = $conn->prepare($query);
 
-    $exec_params = array();
-    foreach ($params as $column => $value){
-      $exec_params[":" . $column] = $value;
-    }
-    
-    
-    $prepared->execute($exec_params);
-    
-    /**
-     * The insert|updade|delete query doesn't return a 'fetchable' value.
-     * 
-     */
-    if (count(explode("select", $query)) > 1) {
-      $prepared->setFetchMode(\PDO::FETCH_ASSOC);
-
-      $result_list = array();
-      while($result = $prepared->fetchAll()) {
-        $result_list[] = $result;
+      $exec_params = array();
+      foreach ($params as $column => $value){
+        $exec_params[":" . $column] = $value;
       }
 
-      return $result_list[0];
+      $prepared->execute($exec_params);
 
-    } else { //Insert, Update or Delete
-      $result_list = $prepared->rowCount();
-      return $result_list;
+      /**
+       * The insert|updade|delete query doesn't return a 'fetchable' value.
+       * 
+       */
+      if (count(explode("select", $query)) > 1) {
+        $prepared->setFetchMode(\PDO::FETCH_ASSOC);
+
+        $result_list = array();
+        while($result = $prepared->fetchAll()) {
+          $result_list[] = $result;
+        }
+
+        $resulset->setResultSet($result_list[0]);
+
+        return $result_list[0];
+
+      } else { //Insert, Update or Delete
+        $result_list = $prepared->rowCount();
+        $resulset->setAffected_rows($resulset);
+        return $result_list;
+        
+      }
+      
+    } catch (\PDOException $pdo_exc){
+      
+      $resulset->setError_code($pdo_exc->getCode());
+      $resulset->setError_message($pdo_exc->getMessage());
+      $resulset->setError_info($pdo_exc->errorInfo);
+      print_r($resulset);
     }
 
   }
