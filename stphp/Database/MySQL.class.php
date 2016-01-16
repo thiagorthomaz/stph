@@ -8,6 +8,20 @@ namespace stphp\Database;
  * @author thiago
  */
 abstract class MySQL extends \stphp\Database\Connection implements \stphp\Database\iDAO {
+  
+  private $resultset;
+  
+  /**
+   * 
+   * @return \stphp\Database\ResultSet
+   */
+  function getResultset() {
+    return $this->resultset;
+  }
+  
+  private function setResultset(\stphp\Database\ResultSet $resultset) {
+    $this->resultset = $resultset;
+  }
 
   protected function connect(iConnectionDB $config){
 
@@ -39,7 +53,8 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
 
   public function delete(\stphp\Database\iDataModel &$data_model) {
     $sql = "delete from " . $this->getTable() . " where id = :id" . " LIMIT 1";
-    return $this->connection->query($sql, array($data_model->getId()));
+    $rs = $this->sendQuery($sql, array("id" => $data_model->getId()));
+    return $rs->getAffected_rows() > 0;
   }
 
   public function insert(iDataModel &$data_model) {
@@ -52,36 +67,19 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     $table_name = "`" . $this->database . "`.`" .$this->getTable();
     $sql = str_replace("(,", "(", "INSERT INTO " . $table_name . "` (`" .$fields_vals[0] . ") VALUES (" . $fields_vals[1] . ");");
 
-    $inserted = $this->sendQuery($sql, $bindings);
-
+    $rs = $this->sendQuery($sql, $bindings);
+    $inserted = $rs->getAffected_rows() > 0;
     return $inserted;
 
   }
 
-  protected function getTableNick($table_name){
-    return substr(md5($table_name), 0, 6);
-  }
-  
-  
   public function select(iDataModel &$data_model) {
     
     $table_name = $this->getTable();
     $sql = "select * from " . $table_name . " where id = :id";
-
-    $STH = $this->connection->prepare($sql);
-    $id = $data_model->getId();
-    $STH->bindParam("id", $id);
-    $STH->execute();
-    
-    $STH->setFetchMode(\PDO::FETCH_ASSOC);
-    
-    $result_list = array();
-    
-    while($result = $STH->fetch()) {
-      $result_list[] = $result;
-    }
-    
-    return $result_list;
+    $params = array("id" => $data_model->getId());
+    $rs = $this->sendQuery($sql, $params);
+    return $rs->getResultSet();
 
   }
 
@@ -142,10 +140,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       $conn = $this->getConnection();
       $prepared = $conn->prepare($query);
 
-      $exec_params = array();
-      foreach ($params as $column => $value){
-        $exec_params[":" . $column] = $value;
-      }
+      $exec_params = $this->prepareParams($params);
 
       $prepared->execute($exec_params);
 
@@ -154,16 +149,10 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
        * 
        */
       if (count(explode("select", $query)) > 1) {
-        $prepared->setFetchMode(\PDO::FETCH_ASSOC);
-
-        $result_list = array();
-        while($result = $prepared->fetchAll()) {
-          $result_list[] = $result;
-        }
-
-        $resulset->setResultSet($result_list[0]);
-
-        return $result_list[0];
+        
+        $resulset = $this->fetchValues($prepared, $resulset);
+        $this->setResultset($resulset);
+        return $resulset;
 
       } else { //Insert, Update or Delete
         $result_list = $prepared->rowCount();
@@ -173,13 +162,48 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       }
       
     } catch (\PDOException $pdo_exc){
-      
+      $resulset->setPdo_exception($pdo_exc);
       $resulset->setError_code($pdo_exc->getCode());
       $resulset->setError_message($pdo_exc->getMessage());
       $resulset->setError_info($pdo_exc->errorInfo);
-      print_r($resulset);
+      return $resulset;
     }
 
+  }
+  
+  /**
+   * 
+   * @param array $params
+   * @return array
+   */
+  private function prepareParams($params){
+    $exec_params = array();
+    foreach ($params as $column => $value){
+      $exec_params[":" . $column] = $value;
+    }
+    return $exec_params;
+  }
+  /**
+   * 
+   * @param \PDOStatement $pdo_statement
+   * @param \stphp\Database\ResultSet $resultset
+   * @return \stphp\Database\ResultSet
+   */
+  private function fetchValues(\PDOStatement $pdo_statement, \stphp\Database\ResultSet $resultset){
+    
+    $pdo_statement->setFetchMode(\PDO::FETCH_ASSOC);
+
+    $result_list = array();
+    while($result = $pdo_statement->fetchAll()) {
+      $result_list[] = $result;
+    }
+
+    if (isset($result_list[0])){
+      $resultset->setResultSet($result_list[0]);
+    }
+
+    return $resultset;
+    
   }
 
 }

@@ -14,6 +14,7 @@ class ResultSet {
   private $error_code;
   private $error_message;
   private $error_info;
+  private $pdo_exception;
   
   public function getResultSet() {
     return $this->resultSet;
@@ -33,6 +34,18 @@ class ResultSet {
 
   function getError_message() {
     return $this->error_message;
+  }
+  
+  /**
+   * 
+   * @return \PDOException
+   */
+  function getPdo_exception() {
+    return $this->pdo_exception;
+  }
+
+  function setPdo_exception(\PDOException $pdo_exception) {
+    $this->pdo_exception = $pdo_exception;
   }
 
   function setError_message($error_message) {
