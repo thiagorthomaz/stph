@@ -152,14 +152,14 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
         
         $resulset = $this->fetchValues($prepared, $resulset);
         $this->setResultset($resulset);
-        return $resulset;
 
       } else { //Insert, Update or Delete
         $result_list = $prepared->rowCount();
-        $resulset->setAffected_rows($resulset);
-        return $result_list;
+        $resulset->setAffected_rows($result_list);
         
       }
+      
+      return $resulset;
       
     } catch (\PDOException $pdo_exc){
       $resulset->setPdo_exception($pdo_exc);
