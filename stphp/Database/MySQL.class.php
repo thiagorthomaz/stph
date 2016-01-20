@@ -67,9 +67,14 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     $table_name = "`" . $this->database . "`.`" .$this->getTable();
     $sql = str_replace("(,", "(", "INSERT INTO " . $table_name . "` (`" .$fields_vals[0] . ") VALUES (" . $fields_vals[1] . ");");
 
-    $rs = $this->sendQuery($sql, $bindings);
-    $inserted = $rs->getAffected_rows() > 0;
-    return $inserted;
+    $result = $this->sendQuery($sql, $bindings);
+    
+    if ($result->getAffected_rows() > 0){
+      $data_model->setId($result->getLastInsertId());
+      return TRUE;
+    }
+    
+    return FALSE;
 
   }
 
@@ -156,6 +161,8 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       } else { //Insert, Update or Delete
         $result_list = $prepared->rowCount();
         $resulset->setAffected_rows($result_list);
+        echo $conn->lastInsertId();exit;
+        $resulset->setLastInsertId($conn->lastInsertId());
         
       }
       

@@ -14,6 +14,7 @@ class ResultSet {
   private $error_code;
   private $error_message;
   private $error_info;
+  private $lastInsertId;
   private $pdo_exception;
   
   public function getResultSet() {
@@ -42,6 +43,14 @@ class ResultSet {
    */
   function getPdo_exception() {
     return $this->pdo_exception;
+  }
+
+  function getLastInsertId() {
+    return $this->lastInsertId;
+  }
+
+  function setLastInsertId($lastInsertId) {
+    $this->lastInsertId = $lastInsertId;
   }
 
   function setPdo_exception(\PDOException $pdo_exception) {
