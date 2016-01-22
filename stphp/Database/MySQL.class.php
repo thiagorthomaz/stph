@@ -161,7 +161,6 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       } else { //Insert, Update or Delete
         $result_list = $prepared->rowCount();
         $resulset->setAffected_rows($result_list);
-        echo $conn->lastInsertId();exit;
         $resulset->setLastInsertId($conn->lastInsertId());
         
       }
