@@ -9,5 +9,5 @@ namespace stphp\rest;
  * @author thiago
  */
 class Request extends \stphp\http\HttpServlet {
-  
+
 }

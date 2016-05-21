@@ -63,20 +63,22 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
   private function recoverGetData(\stphp\http\HttpRequest &$request){
     
     $string_parameters = filter_input(INPUT_SERVER, "QUERY_STRING");
-
+    
     if (!empty($string_parameters)){
-      $array_parameters = explode("&", $string_parameters);
+      if (strpos($string_parameters, "&")){
 
-      foreach ($array_parameters as $parameter){
+        $array_parameters = explode("&", $string_parameters);
 
-        $param = explode("=", $parameter);
-        $key = $param[0];
-        $value = $param[1];
+        foreach ($array_parameters as $parameter){
 
-        $request->addParam($key,$value);
+          $param = explode("=", $parameter);
+          $key = $param[0];
+          $value = $param[1];
 
+          $request->addParam($key,$value);
+
+        }
       }
-
     }
     
   }

@@ -25,7 +25,7 @@ class STPHP {
   private $response;
   
   function __construct() {
-    
+
     $request = new \stphp\rest\Request();
     $this->request = $request->getRequest();
     $this->response = $request->getReponse();
@@ -52,7 +52,7 @@ class STPHP {
     $full_url = filter_input(INPUT_SERVER, "REQUEST_URI");
 
     $parts_url = explode("?", $full_url);
-    $parts_url = explode("/", $parts_url[0]);
+    $parts_url = explode("/", $parts_url[1]);
 
     $namespace  = "controller";
     $class = "View";
