@@ -48,16 +48,17 @@ class STPHP {
    */
   public function handle(){
     
-    
     $full_url = filter_input(INPUT_SERVER, "REQUEST_URI");
-
-    $parts_url = explode("?", $full_url);
-    $parts_url = explode("/", $parts_url[1]);
-
+    $full_url = str_replace("index.php", "", $full_url);
     $namespace  = "controller";
     $class = "View";
-    $method = "noViewImplemented";
-    
+    $method = "notFound";
+
+    $parts_url = explode("?", $full_url);
+
+    if (isset($parts_url[1])) {
+        $parts_url = explode("/", $parts_url[1]);    
+    }
     foreach ($parts_url as $part){
       $path_invoke = explode(".", $part);
       
@@ -66,6 +67,8 @@ class STPHP {
         $class = ucfirst($path_invoke[0]);
         $method = strtolower($path_invoke[1]);
         
+      } else {
+          $namespace = "view";
       }
       
     }
@@ -80,7 +83,6 @@ class STPHP {
     $rc = new \ReflectionClass($path);
     $obj = $rc->newInstance();
 
-
     if (!is_null( $method ) && method_exists($obj, $method) ) {
       $data = call_user_func(array($obj, $method), $this->response);
     }
@@ -90,7 +92,7 @@ class STPHP {
   }
  
   private function sendData(\stphp\rest\iResponse $response) {
-    echo $response->output($this->response);
+    $response->output($this->response);
   }
   
 }

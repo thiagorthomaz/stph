@@ -37,14 +37,13 @@ $session->start();
 
 $app = new stphp\STPHP();
 $app->handle();
- 
-  
 
-  
-  
 ****************************************************************************/
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
+
+$core_path = "/var/www/html/stphp";
+$app_path = "/var/www/html/stphp/app";
 
 require_once __DIR__ . '/stphp/config/config.php';
 require_once __DIR__ . '/stphp/STPHP.class.php';
@@ -55,11 +54,11 @@ stphp\config\AutoLoad::addNamespace("stphp\\Exception");
 stphp\config\AutoLoad::addNamespace("stphp\\rest");
 stphp\config\AutoLoad::addNamespace("stphp\\http");
 
-stphp\config\AutoLoad::addNamespace("app\\config");
-stphp\config\AutoLoad::addNamespace("app\\controller");
-stphp\config\AutoLoad::addNamespace("app\\model");
-stphp\config\AutoLoad::addNamespace("app\\view");
-stphp\config\AutoLoad::addNamespace("app\\exception");
+stphp\config\AutoLoad::addNamespace("app\\config", $app_path . "/config");
+stphp\config\AutoLoad::addNamespace("app\\controller", $app_path . "/controller");
+stphp\config\AutoLoad::addNamespace("app\\model", $app_path . "/model");
+stphp\config\AutoLoad::addNamespace("app\\view", $app_path . "/view");
+stphp\config\AutoLoad::addNamespace("app\\exception", $app_path . "/exception");
 
 stphp\STPHP::registerExtensions();
 stphp\STPHP::registerAutoload();

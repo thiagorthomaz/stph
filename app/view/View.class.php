@@ -46,13 +46,9 @@ class View implements \stphp\rest\iResponse{
     
   }
   
-  function noViewImplemented() {
-    $c = new \app\controller\Player();
-    $c->get();
-    $data = array("error" => 404, "message" => "Not implemented yet.");
-    $this->setData(json_encode($data));
-    return $this;
-
+  function notFound() {
+    $data = array("error" => 404, "message" => "Not found.");
+    echo json_encode($data);
   }
 
 
