@@ -32,7 +32,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     $this->database = $config->getDatabase();
     $this->host = $config->getHost();
     
-    $dsn = $this->driver.':dbname='.$this->database.";host=".$this->host;
+    $dsn = $this->driver.':dbname='.$this->database.";host=".$this->host .";charset=utf8";
     $pdo = new \PDO($dsn, $username, $pass);
     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     $this->connection = $pdo;
