@@ -25,11 +25,10 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
   
   public function __construct() {
     $request = new \stphp\http\HttpRequest();
-    $response = new \stphp\http\HttpResponse();
-    $this->execute($request, $response);
+    $this->executeRequest($request);
   }
 
-  public function execute(\stphp\http\HttpRequest $request, \stphp\http\HttpResponse $response) {
+  public function executeRequest(\stphp\http\HttpRequest $request) {
 
     $http_host = filter_input(INPUT_SERVER, "HTTP_HOST");
     $request_url = filter_input(INPUT_SERVER, "REQUEST_URI");
@@ -38,12 +37,19 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
     $this->recoverGetData($request);
     
     $this->recoverPostData($request);
-    
     $this->request = $request;
-    $this->response = $response;
     
+    return $this->getRequest();
+
   }
   
+  public function executeResponse(\stphp\http\HttpResponse $response) {
+    $this->response = $response;
+    $response->output();
+  }
+
+  
+
   /**
    * 
    * @return HttpRequest
