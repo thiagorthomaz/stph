@@ -186,26 +186,28 @@ abstract class HttpResponse {
 
   
   //@TODO verificar se o content é um json.
-  public function addContent(ArraySerializable $content, $append_to = null){
-    if (!is_null($append_to)) {
+  public function addContent(ArraySerializable $content, $append_to = false){
+    $class_name = get_class($content);
+
+    if ($append_to) {
 
       $found = false;
 
       foreach ($this->content as $i => $c){
         $field = key($c);
         if ($field == $append_to) {
-          $this->content[$i][$append_to][] = $content->arraySerialize();
+          $this->content[$i][$class_name][] = $content->arraySerialize();
           $found = true;
           break;
         }
       }
-      
-      if (!$found){
-        $this->content[][$append_to][] = $content->arraySerialize();
+
+      if (!$found) {
+        $this->content[$class_name][] = $content->arraySerialize();
       }
     } else {
-      $this->content[] = $content->arraySerialize();
-    }    
+      $this->content[$class_name] = $content->arraySerialize();
+    }
   }  
   
   abstract function output();
