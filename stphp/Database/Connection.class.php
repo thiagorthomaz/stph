@@ -15,7 +15,7 @@ abstract class Connection {
   protected $connection = null;
   
   abstract protected function connect(iConnectionDB $config);
-
+  
   protected function disconect(){
     $this->connection = null;
   }

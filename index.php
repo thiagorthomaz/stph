@@ -4,7 +4,8 @@
  *
  * INSTALATION:
  * Copy the code to your main index.php
- *
+ * Create the directories: exception, view, model and controller
+ * 
  ****************************************************************************
  
 $core_path = "/var/www/html/stphp";
@@ -24,10 +25,10 @@ stphp\config\AutoLoad::addNamespace("stphp\\rest", $core_path . "/stphp/rest");
 stphp\config\AutoLoad::addNamespace("stphp\\http", $core_path . "/stphp/http");
 
 stphp\config\AutoLoad::addNamespace("app\\config", $app_path);
-stphp\config\AutoLoad::addNamespace("app\\controller", $app_path);
-stphp\config\AutoLoad::addNamespace("app\\model", $app_path);
-stphp\config\AutoLoad::addNamespace("app\\view", $app_path);
-stphp\config\AutoLoad::addNamespace("app\\exception", $app_path);
+stphp\config\AutoLoad::addNamespace("app\\controller", $app_path . "/controller");
+stphp\config\AutoLoad::addNamespace("app\\model", $app_path . "/model");
+stphp\config\AutoLoad::addNamespace("app\\view", $app_path . "/view");
+stphp\config\AutoLoad::addNamespace("app\\exception", $app_path . "/exception" );
 
 stphp\STPHP::registerExtensions();
 stphp\STPHP::registerAutoload();
