@@ -105,15 +105,14 @@ abstract class HttpResponse {
    * @var Array 
    */
   protected $content = array();
-      
+    
   /**
    * 
    * @param int $status
    * @param string $type
    */
-  public function __construct($status, $subtype = null) {
-    $this->setType($subtype);
-    $this->setStatus($status);   
+  public function __construct() {
+    $this->defineDefaultHttpStatus();
   }
           
   function getType() {
@@ -128,9 +127,7 @@ abstract class HttpResponse {
     return 'Content-Type: ' . $this->type;     
   }
 
-  function getStatus() {
-    return $this->status;
-  }
+  abstract function getStatus();
 
   function getAction() {
     return $this->action;
@@ -163,6 +160,11 @@ abstract class HttpResponse {
     $this->cookie = $cookie;
   }
 
+  function defineDefaultHttpStatus(){
+    $status = $this->getStatus();
+    $this->setStatus($status);
+  }
+  
   function setStatus($status) {
     
     $status = (int) $status;    
@@ -186,17 +188,18 @@ abstract class HttpResponse {
 
   
   //@TODO verificar se o content é um json.
-  public function addContent(ArraySerializable $content, $append_to = false){
+   public function addContent(ArraySerializable $content, $append_to = false){
     $class_name = get_class($content);
-
+    
     if ($append_to) {
 
       $found = false;
 
-      foreach ($this->content as $i => $c){
+      foreach ($this->content as $c) {
         $field = key($c);
-        if ($field == $append_to) {
-          $this->content[$i][$class_name][] = $content->arraySerialize();
+
+        if ($field == $class_name) {
+          $this->content[$class_name][] = $content->arraySerialize();
           $found = true;
           break;
         }
@@ -205,10 +208,12 @@ abstract class HttpResponse {
       if (!$found) {
         $this->content[$class_name][] = $content->arraySerialize();
       }
-    } else {
+    }
+    else {
       $this->content[$class_name] = $content->arraySerialize();
     }
-  }  
+  }
+  
   
   abstract function output();
 

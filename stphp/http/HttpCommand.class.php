@@ -7,5 +7,6 @@ namespace stphp\http;
  * @author thiago
  */
 interface HttpCommand {
-  public function execute(\stphp\http\HttpRequest $request, \stphp\http\HttpResponse $response);
+  public function executeRequest(\stphp\http\HttpRequest $request);
+  public function executeResponse(\stphp\http\HttpResponse $response);
 }
