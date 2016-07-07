@@ -91,8 +91,8 @@ class STPHP {
     
   }
  
-  private function sendData(\stphp\rest\iResponse $response) {
-    $response->output($this->response);
+  private function sendData(\stphp\http\HttpResponse $response) {
+    $response->output();
   }
   
 }
