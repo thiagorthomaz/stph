@@ -188,7 +188,7 @@ abstract class HttpResponse {
 
   
   //@TODO verificar se o content é um json.
-   public function addContent(ArraySerializable $content, $append_to = false){
+   public function addContent(\app\model\ArraySerializable $content, $append_to = false){
     $class_name = get_class($content);
     
     if ($append_to) {
