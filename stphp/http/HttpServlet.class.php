@@ -74,14 +74,17 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
       if (strpos($string_parameters, "&")){
 
         $array_parameters = explode("&", $string_parameters);
-
+        
         foreach ($array_parameters as $parameter){
-
+          
           $param = explode("=", $parameter);
-          $key = $param[0];
-          $value = $param[1];
+          if (count($param) == 2) {
 
-          $request->addParam($key,$value);
+            $key = $param[0];
+            $value = $param[1];
+
+            $request->addParam($key,$value);
+          }
 
         }
       }

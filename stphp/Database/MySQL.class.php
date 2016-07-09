@@ -136,7 +136,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
    * @param array $params
    * @return mixed
    */
-  public function sendQuery($query, $params) {
+  public function sendQuery($query, $params = array()) {
     
     $resulset = new \stphp\Database\ResultSet();
     

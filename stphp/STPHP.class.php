@@ -65,7 +65,8 @@ class STPHP {
       if (count($path_invoke) == 2) {
 
         $class = ucfirst($path_invoke[0]);
-        $method = strtolower($path_invoke[1]);
+        $method_splited = explode("&", $path_invoke[1]);
+        $method = strtolower($method_splited[0]);
         
       } else {
           $namespace = "view";
