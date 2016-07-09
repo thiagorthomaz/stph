@@ -189,8 +189,11 @@ abstract class HttpResponse {
   
   //@TODO verificar se o content é um json.
    public function addContent(\stphp\ArraySerializable $content, $append_to = false){
-    $class_name = get_class($content);
-    
+
+    $full_class_name = get_class($content);
+    $split = explode("\\",$full_class_name);
+    $class_name = array_pop($split);
+
     if ($append_to) {
 
       $found = false;
