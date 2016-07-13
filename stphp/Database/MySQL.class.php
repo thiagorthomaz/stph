@@ -144,10 +144,14 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       
       $conn = $this->getConnection();
       $prepared = $conn->prepare($query);
-
-      $exec_params = $this->prepareParams($params);
-
-      $prepared->execute($exec_params);
+      
+      if (count($params) >= 1){
+        $exec_params = $this->prepareParams($params);
+        $prepared->execute($exec_params);
+      } else {
+        $prepared->execute();
+      }
+      
 
       /**
        * The insert|updade|delete query doesn't return a 'fetchable' value.
