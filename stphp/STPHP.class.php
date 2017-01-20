@@ -28,7 +28,7 @@ class STPHP {
 
     $request = new \stphp\rest\Request();
     $this->request = $request->getRequest();
-    $this->response = $request->getReponse();
+    $this->response = $request->getResponse();
     
   }
 

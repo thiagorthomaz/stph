@@ -46,7 +46,7 @@ abstract class HttpResponse {
   *   to be in the JavaScript Object Notation (JSON) format, encoded with UTF-8 character encoding.
   */
   private $valid_types = array(
-    "application" => array("xml", "json"),
+    "application" => array("xml", "json", "pdf"),
     "audio" => array("mp3", "mpeg", "ogg"),
     "image" => array("png", "jpg", "gif"),
     "message" => array("partial"),
@@ -54,15 +54,14 @@ abstract class HttpResponse {
     "text" => array("html"),
     "video" => array("mp4", "mkv")
   );
-  
-  
+
   /**
    * Type of response: JSON, HTML, XML
    * 
    * @var string
    */
   protected $type;
-    
+
   /**
    * Specific cookie for the response
    * 
@@ -83,7 +82,7 @@ abstract class HttpResponse {
    * @var int
    */
   protected $status;
-  
+
   /**
    * @Exemple ("class_name" => "method_name")
    * 
@@ -92,20 +91,20 @@ abstract class HttpResponse {
    * @var array
    */
   protected $action;
-  
+
   /**
    * URL to redirect after the request
    * 
    * @var string
    */
   protected $redirect;
-  
+
   /**
    *
    * @var Array 
    */
   protected $content = array();
-    
+
   /**
    * 
    * @param int $status
@@ -114,17 +113,15 @@ abstract class HttpResponse {
   public function __construct() {
     $this->defineDefaultHttpStatus();
   }
-          
-  function getType() {
-    return $this->type;
-  }
+
+  abstract public function getType();
 
   function getCookie() {
     return $this->cookie;
   }
 
   function getHeader() {
-    return 'Content-Type: ' . $this->type;     
+    return 'Content-Type: ' . $this->type;
   }
 
   abstract function getStatus();
@@ -138,22 +135,22 @@ abstract class HttpResponse {
   }
 
   function setType($subtype = self::JSON) {
-    
+
     $found = false;
-    foreach ($this->valid_types as $key => $vt){
-      foreach ($vt as $sub_type){
-        if ($sub_type == $subtype){
+    foreach ($this->valid_types as $key => $vt) {
+      foreach ($vt as $sub_type) {
+        if ($sub_type == $subtype) {
           $found = true;
-          $this->type = $key . "/" .$sub_type;
+          $this->type = $key . "/" . $sub_type . ";charset=utf-8";
           break;
         }
-      }      
-      if ($found) break;
+      }
+      if ($found)
+        break;
     }
     if (!$found) {
       throw new HttpResponseException("Type undefined. See documentation: https://www.w3.org/Protocols/rfc1341/4_Content-Type.html", 400);
-    }    
-    
+    }
   }
 
   function setCookie($cookie) {
@@ -166,11 +163,10 @@ abstract class HttpResponse {
   }
   
   function setStatus($status) {
-    
-    $status = (int) $status;    
+    $status = (int) $status;
     if (($status < 100) || ($status > 505)) {
-      throw new HttpResponseException("Invalid status code. See documentation: http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml", 400);      
-    }    
+      throw new HttpResponseException("Invalid status code. See documentation: http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml", 400);
+    }
     $this->status = $status;
   }
 
@@ -181,19 +177,15 @@ abstract class HttpResponse {
   function setRedirect($redirect) {
     $this->redirect = $redirect;
   }
-  
+
   function getContent() {
     return $this->content;
   }
 
-  
   //@TODO verificar se o content é um json.
    public function addContent(\stphp\ArraySerializable $content, $append_to = false){
-
-    $full_class_name = get_class($content);
-    $split = explode("\\",$full_class_name);
-    $class_name = array_pop($split);
-
+    $class_name = get_class($content);
+    
     if ($append_to) {
 
       $found = false;
@@ -218,8 +210,11 @@ abstract class HttpResponse {
   }
   
   
-  abstract function output();
-
-
+  public function output() {    
+    $this->setType($this->getType());
+    header($this->getHeader());
+    echo $this->serialize();
+  }
   
+  abstract function serialize();
 }

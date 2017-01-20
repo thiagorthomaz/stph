@@ -22,7 +22,6 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
    */
   protected $response;
   
-  
   public function __construct() {
     $request = new \stphp\http\HttpRequest();
     $this->executeRequest($request);
@@ -35,7 +34,7 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
     $request->setHost($http_host);
     $request->setUrl($http_host . $request_url);
     $this->recoverGetData($request);
-    
+   
     $this->recoverPostData($request);
     $this->request = $request;
     
@@ -47,9 +46,7 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
     $this->response = $response;
     $response->output();
   }
-
   
-
   /**
    * 
    * @return HttpRequest
@@ -62,32 +59,27 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
    * 
    * @return HttpResponse
    */
-  public function getReponse(){
+  public function getResponse(){
     return $this->response;
   }
   
   private function recoverGetData(\stphp\http\HttpRequest &$request){
     
     $string_parameters = filter_input(INPUT_SERVER, "QUERY_STRING");
-    
-    if (!empty($string_parameters)){
-      if (strpos($string_parameters, "&")){
 
-        $array_parameters = explode("&", $string_parameters);
-        
-        foreach ($array_parameters as $parameter){
-          
-          $param = explode("=", $parameter);
-          if (count($param) == 2) {
+    if (!empty($string_parameters) && strpos($string_parameters, "&")){
+      $array_parameters = explode("&", $string_parameters);
 
-            $key = $param[0];
-            $value = $param[1];
+      foreach ($array_parameters as $parameter){
 
-            $request->addParam($key,$value);
-          }
+        $param = explode("=", $parameter);
+        $key = $param[0];
+        $value = $param[1];
 
-        }
+        $request->addParam($key,$value);
+
       }
+
     }
     
   }
