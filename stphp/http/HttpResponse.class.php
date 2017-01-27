@@ -184,8 +184,11 @@ abstract class HttpResponse {
 
   //@TODO verificar se o content é um json.
    public function addContent(\stphp\ArraySerializable $content, $append_to = false){
-    $class_name = get_class($content);
-    
+     
+    //Get class name without namespace.
+    $class_name_with_namespace = get_class($content);
+    $class_name = substr($class_name_with_namespace, strrpos($class_name_with_namespace, '\\')+1);
+  
     if ($append_to) {
 
       $found = false;

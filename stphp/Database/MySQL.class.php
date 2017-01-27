@@ -88,10 +88,18 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
 
   }
 
-  public function selectAll($limit = 100) {
+  public function selectAll($limit = 100, \stphp\Database\iDataModel $model = null) {
+    
     $sql = "select * from " . $this->getTable() . " LIMIT " . $limit;
     $STH = $this->connection->query($sql);
-    $STH->setFetchMode(\PDO::FETCH_ASSOC);
+    
+    if (is_null($model)) {
+      $STH->setFetchMode(\PDO::FETCH_ASSOC);
+    } else {
+      $class_name = get_class($model);
+      $STH->setFetchMode(\PDO::FETCH_CLASS, $class_name);  
+    }
+    
     
     $result_list = array();
     
