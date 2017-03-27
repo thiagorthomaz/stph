@@ -83,7 +83,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     $table_name = $this->getTable();
     $sql = "select * from " . $table_name . " where id = :id";
     $params = array("id" => $data_model->getId());
-    $rs = $this->sendQuery($sql, $params);
+    $rs = $this->sendQuery($sql, $params, $data_model);
     return $rs->getResultSet();
 
   }
@@ -144,7 +144,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
    * @param array $params
    * @return mixed
    */
-  public function sendQuery($query, $params = array()) {
+  public function sendQuery($query, $params = array(), iDataModel &$data_model = null) {
     
     $resulset = new \stphp\Database\ResultSet();
     
@@ -167,7 +167,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
        */
       if (count(explode("select", $query)) > 1) {
         
-        $resulset = $this->fetchValues($prepared, $resulset);
+        $resulset = $this->fetchValues($prepared, $resulset, $data_model);
         $this->setResultset($resulset);
 
       } else { //Insert, Update or Delete
@@ -177,6 +177,8 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
         
       }
       
+      $this->setResultset($resulset);
+      
       return $resulset;
       
     } catch (\PDOException $pdo_exc){
@@ -184,6 +186,7 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
       $resulset->setError_code($pdo_exc->getCode());
       $resulset->setError_message($pdo_exc->getMessage());
       $resulset->setError_info($pdo_exc->errorInfo);
+      $this->setResultset($resulset);
       return $resulset;
     }
 
@@ -207,9 +210,14 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
    * @param \stphp\Database\ResultSet $resultset
    * @return \stphp\Database\ResultSet
    */
-  private function fetchValues(\PDOStatement $pdo_statement, \stphp\Database\ResultSet $resultset){
-    
-    $pdo_statement->setFetchMode(\PDO::FETCH_ASSOC);
+  private function fetchValues(\PDOStatement $pdo_statement, \stphp\Database\ResultSet $resultset, iDataModel &$data_model = null){
+
+    if (!is_null($data_model)) {
+      $class_name = get_class($data_model);
+      $pdo_statement->setFetchMode(\PDO::FETCH_CLASS, $class_name);  
+    } else {
+      $pdo_statement->setFetchMode(\PDO::FETCH_ASSOC);  
+    }
 
     $result_list = array();
     while($result = $pdo_statement->fetchAll()) {
@@ -222,6 +230,17 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
 
     return $resultset;
     
+  }
+  
+  public function beginTransaction(){
+    $this->connection->beginTransaction();
+  }
+  public function commit(){
+    $this->connection->commit();
+  }
+  
+  public function rollBack(){
+    $this->connection->rollBack();
   }
 
 }

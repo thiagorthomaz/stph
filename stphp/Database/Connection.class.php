@@ -11,7 +11,10 @@ abstract class Connection {
   protected $host = "localhost";
   protected $port = "27017";
   protected $database = null;
-
+  /**
+   *
+   * @var \PDO
+   */
   protected $connection = null;
   
   abstract protected function connect(iConnectionDB $config);
