@@ -111,8 +111,44 @@ abstract class MySQL extends \stphp\Database\Connection implements \stphp\Databa
     
   }
 
-  public function update($criteria, iDataModel &$data_model) {
+  public function update(iDataModel &$data_model, $criteria = null) {
+    
+    
+    $bindings = $this->modeltoArray($data_model);
+    $up_keys_binding = array();    
+    $bindings_value = array();    
+    $bindings_fields = array();    
+    $bindings = $this->modeltoArray($data_model);
 
+    $fields = array_keys($bindings);
+    
+    foreach ($fields as $f) {
+      $bindings_value["up_" . $f] = call_user_func(array($data_model, "get" . $f));
+      $bindings_fields[] = $f . " = :up_" .$f; 
+    }
+    
+    $bindings_fields_string = implode(",", $bindings_fields);
+
+    if (is_array($criteria)) {
+      foreach ($criteria as $field => $value) {
+        $up_keys_value_binding["cr_" . $field] = $value;
+        $up_keys_binding[] = $field . " = :cr_" . $field;
+      }
+    }
+    
+    $bindings = array_merge($bindings_value, $up_keys_value_binding);
+    $fields_where = implode(" and ", $up_keys_binding);
+    
+    $table_name = "`" . $this->database . "`.`" .$this->getTable() . "`";
+    $sql = str_replace("(,", "(", "update " . $table_name . " SET " . $bindings_fields_string . " where " . $fields_where . ";");
+    
+    $result = $this->sendQuery($sql, $bindings);
+    
+    if ($result->getAffected_rows() > 0 || empty($result->getError_code())){
+      return TRUE;
+    }
+    
+    return FALSE;
 
   }
 

@@ -14,7 +14,7 @@ interface iDAO {
    * 
    * @param array $criteria
    */
-  public function update($criteria, \stphp\Database\iDataModel &$data_model);
+  public function update(\stphp\Database\iDataModel &$data_model, $criteria = null);
   
   /**
    * 

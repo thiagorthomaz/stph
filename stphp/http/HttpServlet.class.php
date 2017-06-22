@@ -74,6 +74,9 @@ abstract class HttpServlet implements \stphp\http\HttpCommand {
 
         $param = explode("=", $parameter);
         $key = $param[0];
+        if (!isset($param[1])) {
+          continue;
+        }
         $value = $param[1];
 
         $request->addParam($key,$value);
